@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>reveal.js</title>
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css">
+    <style type="text/css">
+        .reveal h1,
+        .reveal h2,
+        .reveal h3,
+        .reveal h4,
+        .reveal h5,
+        .reveal h6 {
+            text-transform: none;
+        }
+    </style>
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section data-markdown>
+            <script type="text/template">
+                ## 会議室が暑くなってきたらSlackに通知を飛ばすやつを作った
+            </script>
+        </section>
+        <section>
+            <section data-markdown>
+                <script type="text/template">
+                    ## 会議室暑いですよね？
+
+                    ![1](./1.jpg)
+                </script>
+            </section>
+            <section data-markdown>
+                <script type="text/template">
+                    ## 室温は28度以下にしなければいけない！
+
+                    #### 事業者は、空気調和設備を設けている場合は、室の気温が十七度以上二十八度以下及び相対温度が四十パーセント以上七十パーセント以下になるように努めなければならない
+
+                    Slackに通知することにより法令遵守！
+                </script>
+            </section>
+            <section data-markdown>
+                <script type="text/template">
+                    ## と思ったけど・・・
+
+                    最近空調が効くようになったので、プラスαしてみました
+                </script>
+            </section>
+        </section>
+        <section data-markdown>
+            <script type="text/template">
+                ## 会議室が暑くなってきたらSlackに通知しつつ、milkcocoaでデータをグラフ化してみた
+            </script>
+        </section>
+        <section data-markdown>
+            <script type="text/template">
+                ## 実物
+
+                ![DHT11](IMG_1258.JPG)
+            </script>
+        </section>
+        <section data-markdown>
+            <script type="text/template">
+                ## システム構成
+
+                ![システム構成](system.001.png)
+            </script>
+        </section>
+        <section data-markdown>
+            <script type="text/template">
+                ## 用意するもの
+
+                * Raspberry Pi 3
+                * DHT11(どちらでも可)
+                    * センサー単品 300yen
+                    * モジュール化したもの 600yen
+                * ジャンパーワイヤー
+                * 抵抗
+                * ブレッドボード
+                * milkcocoaアカウント
+            </script>
+        </section>
+        <section>
+            <section data-markdown>
+                <script type="text/template">
+                    ## 配線
+
+                    モジュールの方を買ったので、次のように接続します。
+
+                    * 緑(DATA) → GPIO4
+                    * 赤(VCC) → 5V
+                    * 黒(GND) → GND
+
+                </script>
+            </section>
+            <section data-markdown>
+                <script type="text/template">
+                    ## 配線
+
+                    ![ブレッドボード](ブレッドボード.png)
+
+                    ※図はセンサー単品の場合です
+                </script>
+            </section>
+        </section>
+        <section data-markdown>
+            <script type="text/template">
+                ## インストール
+
+                #### BCM2835のインストール
+                node-dht-sensorで必要になるため、あらかじめインストールしておく
+
+                ```
+                $ wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.50.tar.gz
+                $ tar xvfz ./bcm2835-1.50.tar.gz
+                $ cd bcm2835-1.50/
+                $ ./configure
+                $ make
+                $ sudo make install
+                ```
+
+                インストール後はDevice Treeを有効にして再起動
+
+                ```
+                sudo raspi-config
+                under Advanced Options - enable Device Tree
+                Reboot.
+                ```
+            </script>
+        </section>
+        <section data-markdown>
+            <script type="text/template">
+                ## プログラム
+
+                #### モジュールのインストール
+                ```
+                $ npm i -S node-dht-sensor request-promise milkcocoa
+                ```
+            </script>
+        </section>
+        <section data-markdown>
+            <script type="text/template">
+                ## 動かす！！
+
+                ```
+                $ node app.js
+                Temperature: 28.00C, humidity: 47.00%
+                Temperature: 28.00C, humidity: 47.00%
+                Temperature: 28.00C, humidity: 47.00%
+                Temperature: 28.00C, humidity: 47.00%
+                Temperature: 28.00C, humidity: 47.00%
+                Temperature: 28.00C, humidity: 48.00%
+                Temperature: 28.00C, humidity: 46.00%
+
+                ```
+            </script>
+        </section>
+        <section data-markdown>
+            <script type="text/template">
+                ## milkcocoaで見る
+
+                ここに写真
+            </script>
+        </section>
+        <section data-markdown>
+            <script type="text/template">
+                ## デモ
+
+            </script>
+        </section>
+    </div>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+    // More info https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        history: true,
+
+        // More info https://github.com/hakimel/reveal.js#dependencies
+        dependencies: [
+            {src: 'plugin/markdown/marked.js'},
+            {src: 'plugin/markdown/markdown.js'},
+            {src: 'plugin/notes/notes.js', async: true},
+            {
+                src: 'plugin/highlight/highlight.js', async: true, callback: function () {
+                hljs.initHighlightingOnLoad();
+            }
+            }
+        ]
+    });
+</script>
+</body>
+</html>
