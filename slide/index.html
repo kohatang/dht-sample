@@ -50,7 +50,8 @@
                 <script type="text/template">
                     ## 室温は28度以下にしなければいけない！
 
-                    #### 事業者は、空気調和設備を設けている場合は、室の気温が十七度以上二十八度以下及び相対温度が四十パーセント以上七十パーセント以下になるように努めなければならない
+                    > #### 事務所衛生基準規則5条3項
+                    > 事業者は、空気調和設備を設けている場合は、室の気温が十七度以上二十八度以下及び相対温度が四十パーセント以上七十パーセント以下になるように努めなければならない
 
                     Slackに通知することにより法令遵守！
                 </script>
@@ -70,16 +71,9 @@
         </section>
         <section data-markdown>
             <script type="text/template">
-                ## 実物
-
-                ![DHT11](IMG_1258.JPG)
-            </script>
-        </section>
-        <section data-markdown>
-            <script type="text/template">
                 ## システム構成
 
-                ![システム構成](system.001.png)
+                <img src="./system.001.png" width="70%">
             </script>
         </section>
         <section data-markdown>
@@ -113,9 +107,16 @@
                 <script type="text/template">
                     ## 配線
 
-                    ![ブレッドボード](ブレッドボード.png)
+                    <img src="./ブレッドボード.png" width="50%">
 
                     ※図はセンサー単品の場合です
+                </script>
+            </section>
+            <section data-markdown>
+                <script type="text/template">
+                    ## 完成形
+
+                    <img src="./IMG_1258.JPG" width="70%">
                 </script>
             </section>
         </section>
@@ -144,44 +145,148 @@
                 ```
             </script>
         </section>
-        <section data-markdown>
-            <script type="text/template">
-                ## プログラム
+        <section>
+            <section data-markdown>
+                <script type="text/template">
+                    ## プログラム
 
-                #### モジュールのインストール
-                ```
-                $ npm i -S node-dht-sensor request-promise milkcocoa
-                ```
+                    #### モジュールのインストール
+                    ```
+                    $ npm i -S node-dht-sensor request-promise milkcocoa
+                    ```
+                </script>
+            </section>
+            <section data-markdown>
+                <script type="text/template">
+                    ## プログラム
+
+                    #### 実装
+                    ```
+                    var sensorLib = require('node-dht-sensor');
+                    var MilkCocoa = require('milkcocoa');
+                    var milkcocoa = new MilkCocoa('your milkcocoa app');
+                    var rp = require('request-promise');
+
+                    var sensor = {
+                      initialize: function () {
+                        return sensorLib.initialize(11, 4);
+                      },
+                      read: function () {
+                        var readout = sensorLib.read();
+                        console.log('Temperature: ' + readout.temperature.toFixed(2) + 'C, ' +
+                          'humidity: ' + readout.humidity.toFixed(2) + '%');
+                        milkcocoa.dataStore('temp').push({
+                          'temperature': readout.temperature.toFixed(2),
+                          'humidity': readout.humidity.toFixed(2)
+                        });
+
+                        if (readout.temperature > 30) {
+                          var options = {
+                            method: 'POST',
+                            uri: 'your slack webhook',
+                            body: {
+                              text: '現在の室温は' + readout.temperature.toFixed(2) + 'です'
+                            },
+                            json: true
+                          };
+
+                          rp(options)
+                            .then()
+                            .catch(function(err) {
+                              console.log(err);
+                            });
+                        }
+
+                        setTimeout(function () {
+                          sensor.read();
+                        }, 60000 * 10);
+                      }
+                    };
+
+                    if (sensor.initialize()) {
+                      sensor.read();
+                    } else {
+                      console.warn('Failed to initialize sensor');
+                    }
+                    ```
+                </script>
+            </section>
+        </section>
+        <section>
+            <section data-markdown>
+                <script type="text/template">
+                    ## 動かす！！
+
+                    ```
+                    $ node app.js
+                    Temperature: 28.00C, humidity: 47.00%
+                    Temperature: 28.00C, humidity: 47.00%
+                    Temperature: 28.00C, humidity: 47.00%
+                    Temperature: 28.00C, humidity: 47.00%
+                    Temperature: 28.00C, humidity: 47.00%
+                    Temperature: 28.00C, humidity: 48.00%
+                    Temperature: 28.00C, humidity: 46.00%
+
+                    ```
+                </script>
+            </section>
+            <section data-markdown>
+                <script type="text/template">
+                    ## 一定温度以上になるとSlackへ通知
+
+                    ![Slack](./Slack.png)
+                </script>
+            </section>
+            <section data-markdown>
+                <script type="text/template">
+                    ## milkcocoaで見る
+
+                    ![freeboard](./freeboard.png)
+                </script>
+            </section>
+        </section>
+
+        <section><!-- webcam section for showing apps-->
+            <h2>デモ</h2>
+
+            <div>
+                <video width="640" height="480" id="webcamOutput"></video>
+
+                <script type="text/javascript">
+
+                    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+                            navigator.mozGetUserMedia || navigator.msGetUserMedia;
+                    window.URL = window.URL || window.webkitURL;
+
+                    navigator.getUserMedia({video:true}, function (localMediaStream) {
+                        var video = document.getElementById("webcamOutput");
+                        video.autoplay = true;
+                        video.src = window.URL.createObjectURL(localMediaStream);
+                    }, function (error) {
+                        console.log(error);
+                    });
+
+                </script>
+            </div>
+
+        </section>
+        <section data-markdown data-background-image="./38461496.jpg">
+            <script type="text/template">
+                ## まとめ
+
+                * センサー安い
+                * node.jsで大体戦える
+                * IoT楽しい
+
             </script>
         </section>
         <section data-markdown>
             <script type="text/template">
-                ## 動かす！！
+                # おわり
 
-                ```
-                $ node app.js
-                Temperature: 28.00C, humidity: 47.00%
-                Temperature: 28.00C, humidity: 47.00%
-                Temperature: 28.00C, humidity: 47.00%
-                Temperature: 28.00C, humidity: 47.00%
-                Temperature: 28.00C, humidity: 47.00%
-                Temperature: 28.00C, humidity: 48.00%
-                Temperature: 28.00C, humidity: 46.00%
+                資料はここ
 
-                ```
-            </script>
-        </section>
-        <section data-markdown>
-            <script type="text/template">
-                ## milkcocoaで見る
-
-                ここに写真
-            </script>
-        </section>
-        <section data-markdown>
-            <script type="text/template">
-                ## デモ
-
+                https://github.com/koihatano/dht-sample
             </script>
         </section>
     </div>
